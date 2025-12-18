@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* --- GLOBAL STYLES --- */
+    body {
+      font-family: 'Inter', sans-serif;
+      padding: 0;
+      margin: 0;
+      color: #333;
+      background-color: #fff;
+      font-size: 14px;
+      overflow: hidden; /* Hide scrollbars on body */
+      
+      /* Disable text selection globally */
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: default;
+    }
+
+    /* --- WRAPPER --- */
+    #app-wrapper {
+      /* UPDATED: Removed min-height: 100vh so it can resize based on content */
+      display: flex;
+      flex-direction: column;
+      
+      /* UPDATED: Visible overflow allows dropdowns to float outside if needed, 
+         but we rely on resizing the window to fit content */
+      overflow: visible; 
+      padding-bottom: 4px; /* Tiny buffer for shadow rendering */
+    }
+    
+    /* --- TABS SYSTEM --- */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #e5e5e5;
+      background: #fafafa;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 14px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #888;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab:hover { background: #f0f0f0; color: #555; }
+    .tab.active {
+      color: #18A0FB;
+      border-bottom: 2px solid #18A0FB;
+      background: #fff;
+    }
+
+    /* --- CONTENT AREA --- */
+    .content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px; 
+    }
+
+    .options-panel { display: none; }
+    .options-panel.active { display: block; }
+
+    /* --- INPUT GROUP --- */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px; 
+      width: 100%;
+    }
+
+    /* --- INPUT FIELDS --- */
+    input[type="text"] {
+      width: 100%;
+      height: 32px;
+      border: 1px solid #e1e1e1;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #333;
+      background-color: white;
+      box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: 'Inter', sans-serif;
+      padding: 0 12px;
+      user-select: text;
+      -webkit-user-select: text;
+      cursor: text;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #18A0FB;
+      box-shadow: 0 0 0 1px #18A0FB;
+    }
+
+    /* --- TEXT AREA --- */
+    textarea {
+      width: 100%;
+      height: 140px; 
+      padding: 12px;
+      border: 1px solid #e1e1e1;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      resize: none;
+      box-sizing: border-box;
+      color: #444;
+      line-height: 1.5;
+      transition: background-color 0.2s, border-color 0.2s;
+      user-select: text;
+      -webkit-user-select: text;
+      cursor: text;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #18A0FB;
+      box-shadow: 0 0 0 1px #18A0FB;
+    }
+
+    textarea[readonly] {
+      background-color: #f9f9f9;
+      color: #aaa;
+      border-color: #eee;
+      pointer-events: none; 
+      user-select: none;
+      -webkit-user-select: none;
+      outline: none;
+    }
+
+    /* --- NEW CUSTOM DROPDOWN STYLES --- */
+    .custom-select-wrapper {
+      position: relative;
+      width: 100%;
+      user-select: none;
+    }
+
+    .custom-select-trigger {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 14px;
+      color: #333;
+      height: 32px;
+      background: #ffffff;
+      border: 1px solid #e1e1e1;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .custom-select-trigger:hover { border-color: #ccc; }
+
+    .custom-select-trigger::after {
+      content: '';
+      width: 10px;
+      height: 6px;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23555555' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      transition: transform 0.2s;
+    }
+
+    .custom-select-wrapper.open .custom-select-trigger {
+      border-color: #18A0FB;
+      box-shadow: 0 0 0 1px #18A0FB;
+    }
+    
+    .custom-select-wrapper.open .custom-select-trigger::after {
+      transform: rotate(180deg);
+    }
+
+    .custom-options {
+      position: absolute;
+      display: block;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #e1e1e1;
+      border-radius: 8px;
+      margin-top: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 100;
+      transform: translateY(-10px);
+      transition: all 0.2s;
+      overflow: hidden;
+    }
+
+    .custom-select-wrapper.open .custom-options {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+
+    .custom-option {
+      padding: 0 12px;
+      height: 32px;
+      line-height: 32px;
+      font-size: 14px;
+      color: #333;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .custom-option:hover {
+      background-color: #f0f8ff;
+      color: #18A0FB;
+    }
+
+    .custom-option.selected {
+      background-color: #e6f7ff;
+      color: #18A0FB;
+      font-weight: 500;
+    }
+
+    /* --- FILE UPLOAD --- */
+    .file-drop-area {
+      border: 1px dashed #ccc;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      background: #fafafa;
+      position: relative;
+    }
+    .file-drop-area:hover { background: #f0f8ff; border-color: #18A0FB; }
+    
+    input[type=file] {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .file-msg { font-size: 14px; color: #666; pointer-events: none; }
+    .file-icon { font-size: 20px; display: block; margin-bottom: 8px; }
+
+    /* --- LAYOUT GRID --- */
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .footer-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .footer-item > label {
+      font-size: 14px; 
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      margin: 0; 
+    }
+
+    /* --- RADIO BUTTONS --- */
+    .radio-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      height: 32px; 
+    }
+    
+    .radio-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #333;
+      cursor: pointer;
+      text-transform: none; 
+      font-weight: normal;
+    }
+    
+    input[type="radio"] {
+      margin: 0;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    /* --- BUTTON --- */
+    #apply-btn {
+      background-color: #18A0FB;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      height: 32px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500; 
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+      margin-top: 0;
+    }
+    #apply-btn:hover { background-color: #0D8ADB; }
+  </style>
+</head>
+<body>
+
+  <div id="app-wrapper">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('manual')">Manual</div>
+      <div class="tab" onclick="switchTab('upload')">Upload</div>
+    </div>
+
+    <div class="content">
+
+      <div id="opt-upload" class="options-panel">
+        <div class="file-drop-area">
+          <span class="file-icon">📂</span>
+          <span class="file-msg" id="file-label">Choose a file...</span>
+          <input type="file" id="file-input" accept=".txt, .csv, .md, .json">
+        </div>
+        <div style="font-size: 14px; color:#aaa; margin-top:8px;">Supports .txt, .csv, .md, .json</div>
+      </div>
+
+      <div class="input-group">
+        <div id="opt-manual" class="options-panel active">
+          <div style="font-size: 14px; color:#333;">Enter or paste text</div>
+        </div>
+        <textarea id="text-input" placeholder="Enter values here..."></textarea>
+      </div>
+
+      <div class="footer-grid">
+        <div class="footer-item">
+          <label>Prefix</label>
+          <input type="text" id="prefix" placeholder='e.g. $'>
+        </div>
+        <div class="footer-item">
+          <label>Suffix</label>
+          <input type="text" id="suffix" placeholder='e.g. .00'>
+        </div>
+      </div>
+
+      <div class="footer-grid">
+        
+        <div class="footer-item">
+          <label>Text Case</label>
+          <div class="custom-select-wrapper" id="casing" data-value="original">
+            <div class="custom-select-trigger">Keep original</div>
+            <div class="custom-options">
+              <div class="custom-option selected" data-value="original">Keep original</div>
+              <div class="custom-option" data-value="title">Title Case</div>
+              <div class="custom-option" data-value="upper">Uppercase</div>
+              <div class="custom-option" data-value="lower">Lowercase</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-item">
+          <label>Separator</label>
+          <div class="custom-select-wrapper" id="separator" data-value="comma">
+            <div class="custom-select-trigger">Comma</div>
+            <div class="custom-options">
+              <div class="custom-option selected" data-value="comma">Comma</div>
+              <div class="custom-option" data-value="newline">New Line</div>
+              <div class="custom-option" data-value="space">Space</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer-item">
+        <label>Order</label>
+        <div class="radio-row">
+          <label class="radio-item">
+            <input type="radio" name="order" value="sequential" checked> 
+            Sequential
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="order" value="random"> 
+            Random
+          </label>
+        </div>
+      </div>
+
+      <button id="apply-btn">Apply to Selection</button>
+    </div>
+  </div>
+
+  <script>
+    // --- CUSTOM DROPDOWN LOGIC ---
+    document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+      const trigger = wrapper.querySelector('.custom-select-trigger');
+      const options = wrapper.querySelectorAll('.custom-option');
+
+      trigger.addEventListener('click', (e) => {
+        document.querySelectorAll('.custom-select-wrapper').forEach(other => {
+          if (other !== wrapper) other.classList.remove('open');
+        });
+        wrapper.classList.toggle('open');
+        e.stopPropagation();
+      });
+
+      options.forEach(option => {
+        option.addEventListener('click', (e) => {
+          trigger.textContent = option.textContent;
+          wrapper.dataset.value = option.dataset.value;
+          options.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          wrapper.classList.remove('open');
+          e.stopPropagation();
+        });
+      });
+    });
+
+    window.addEventListener('click', () => {
+      document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+        wrapper.classList.remove('open');
+      });
+    });
+
+    // --- TAB LOGIC ---
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      document.querySelectorAll('.options-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('opt-' + tabName).classList.add('active');
+
+      const input = document.getElementById('text-input');
+      
+      if (tabName === 'manual') {
+        input.placeholder = "Enter values here...";
+        input.readOnly = false; 
+        input.tabIndex = 0;   
+        input.focus();
+      } else {
+        input.placeholder = "Upload a file to populate this box...";
+        input.readOnly = true; 
+        input.tabIndex = -1;  
+        input.value = "";     
+        input.blur();         
+      }
+      
+      // Force update with slight delay to ensure render complete
+      requestAnimationFrame(() => {
+        updateHeight();
+        setTimeout(updateHeight, 50); // Backup safety check
+      });
+    }
+
+    // --- FILE UPLOAD LOGIC ---
+    const fileInput = document.getElementById('file-input');
+    
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      document.getElementById('file-label').textContent = file.name;
+      document.getElementById('file-label').style.color = "#18A0FB";
+      document.getElementById('file-label').style.fontWeight = "600";
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        document.getElementById('text-input').value = event.target.result;
+        
+        const sepWrapper = document.getElementById('separator');
+        sepWrapper.dataset.value = "newline";
+        sepWrapper.querySelector('.custom-select-trigger').textContent = "New Line";
+        sepWrapper.querySelectorAll('.custom-option').forEach(opt => {
+          opt.classList.toggle('selected', opt.dataset.value === 'newline');
+        });
+      };
+      reader.readAsText(file);
+    });
+
+    // --- SEND TO FIGMA ---
+    document.getElementById('apply-btn').onclick = () => {
+      const orderValue = document.querySelector('input[name="order"]:checked').value;
+
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'apply-text', 
+          textList: document.getElementById('text-input').value,
+          mode: orderValue,
+          separator: document.getElementById('separator').dataset.value,
+          prefix: document.getElementById('prefix').value,
+          suffix: document.getElementById('suffix').value,
+          casing: document.getElementById('casing').dataset.value
+        } 
+      }, '*');
+    }
+
+    // --- AUTO RESIZE LOGIC ---
+    const appWrapper = document.getElementById('app-wrapper');
+
+    function updateHeight() {
+      // Get the height of the wrapper content
+      const newHeight = appWrapper.offsetHeight;
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'resize', 
+          width: 340, 
+          height: newHeight 
+        } 
+      }, '*');
+    }
+
+    const resizeObserver = new ResizeObserver(entries => {
+      updateHeight();
+    });
+    
+    resizeObserver.observe(appWrapper);
+    window.addEventListener('DOMContentLoaded', updateHeight);
+  </script>
+</body>
+</html>
