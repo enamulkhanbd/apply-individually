@@ -22,7 +22,7 @@ jobs:
       - name: Compute release slug
         id: release_slug
         run: |
-          echo "slug=${GITHUB_REPOSITORY//\//-}" >> "$GITHUB_OUTPUT"
+          echo "slug=${GITHUB_REPOSITORY#*/}" >> "$GITHUB_OUTPUT"
 
       - name: Compute next version + collect release notes
         id: compute

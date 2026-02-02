@@ -19,7 +19,7 @@ jobs:
       - name: Compute release slug
         id: release_slug
         run: |
-          echo "slug=${GITHUB_REPOSITORY//\//-}" >> "$GITHUB_OUTPUT"
+          echo "slug=${GITHUB_REPOSITORY#*/}" >> "$GITHUB_OUTPUT"
 
       - name: Package release zip from manifest.json
         shell: bash
