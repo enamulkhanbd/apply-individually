@@ -9,6 +9,8 @@ permissions:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_REPO_SLUG: ${{ replace(github.repository, '/', '-') }}
 
     steps:
       - name: Checkout (full history)
@@ -48,7 +50,7 @@ jobs:
           [ -d assets ] && cp -R assets release/ || true
 
           TAG="${GITHUB_REF_NAME}"
-          ZIP="duplicate-${TAG}.zip"
+          ZIP="${RELEASE_REPO_SLUG}-${TAG}.zip"
           (cd release && zip -r "../$ZIP" .)
 
           echo "Created $ZIP"
@@ -88,4 +90,4 @@ jobs:
         with:
           body_path: release_notes.txt
           files: |
-            duplicate-*.zip
+            ${{ env.RELEASE_REPO_SLUG }}-*.zip

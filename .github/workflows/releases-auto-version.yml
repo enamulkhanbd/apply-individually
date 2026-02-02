@@ -12,6 +12,8 @@ permissions:
 jobs:
   version-and-tag:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_REPO_SLUG: ${{ replace(github.repository, '/', '-') }}
 
     steps:
       - name: Checkout (full history + tags)
@@ -195,7 +197,7 @@ jobs:
           # Only ship manifest-referenced files + optional assets folder.
           [ -d assets ] && cp -R assets release/ || true
 
-          ZIP="duplicate-${TAG}.zip"
+          ZIP="${RELEASE_REPO_SLUG}-${TAG}.zip"
           (cd release && zip -r "../$ZIP" .)
 
           echo "Created $ZIP"
@@ -250,4 +252,4 @@ jobs:
           name: ${{ steps.compute.outputs.new_tag }}
           body_path: release_notes.txt
           files: |
-            duplicate-*.zip
+            ${{ env.RELEASE_REPO_SLUG }}-*.zip
