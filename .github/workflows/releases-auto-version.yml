@@ -12,14 +12,17 @@ permissions:
 jobs:
   version-and-tag:
     runs-on: ubuntu-latest
-    env:
-      RELEASE_REPO_SLUG: ${{ replace(github.repository, '/', '-') }}
 
     steps:
       - name: Checkout (full history + tags)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Compute release slug
+        id: release_slug
+        run: |
+          echo "slug=${GITHUB_REPOSITORY//\//-}" >> "$GITHUB_OUTPUT"
 
       - name: Compute next version + collect release notes
         id: compute
@@ -197,7 +200,8 @@ jobs:
           # Only ship manifest-referenced files + optional assets folder.
           [ -d assets ] && cp -R assets release/ || true
 
-          ZIP="${RELEASE_REPO_SLUG}-${TAG}.zip"
+          SLUG="${{ steps.release_slug.outputs.slug }}"
+          ZIP="${SLUG}-${TAG}.zip"
           (cd release && zip -r "../$ZIP" .)
 
           echo "Created $ZIP"
@@ -252,4 +256,4 @@ jobs:
           name: ${{ steps.compute.outputs.new_tag }}
           body_path: release_notes.txt
           files: |
-            ${{ env.RELEASE_REPO_SLUG }}-*.zip
+            ${{ steps.release_slug.outputs.slug }}-*.zip
