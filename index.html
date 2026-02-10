@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Apply Individually - Figma Plugin</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg: #0b0f1a;
+      --card: #12182a;
+      --card-2: #0f1424;
+      --text: #e6edf7;
+      --muted: #a1acc4;
+      --accent: #36c2ff;
+      --accent-2: #7c5cff;
+      --border: rgba(255, 255, 255, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", "Helvetica Neue", sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 10% 10%, #1b2648 0%, #0b0f1a 60%),
+        radial-gradient(900px 700px at 90% 0%, #1e1b44 0%, #0b0f1a 55%);
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 48px 20px 80px;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 28px;
+      background: linear-gradient(135deg, rgba(54, 194, 255, 0.12), rgba(124, 92, 255, 0.12));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 36px;
+      line-height: 1.1;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 680px;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      color: #071018;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 10px 20px rgba(54, 194, 255, 0.25);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 26px rgba(54, 194, 255, 0.35);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+      font-size: 13px;
+      border: 1px solid var(--border);
+    }
+
+    section {
+      margin-top: 32px;
+      padding: 26px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border: 1px solid var(--border);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      margin-top: 24px;
+      font-size: 18px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    code {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: #d8e0f1;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    @media (min-width: 760px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 12px;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="pill">Figma Plugin</div>
+      <h1>Apply Individually</h1>
+      <p>
+        Apply different text values to multiple selected Figma text layers in one pass.
+        Supports sequential or random assignment, optional prefix/suffix, and text casing transforms.
+      </p>
+      <div class="cta-row">
+        <a class="btn" href="https://github.com/enamulkhanbd/apply-individually/releases/latest" target="_blank" rel="noopener">
+          Download Plugin
+        </a>
+        <span class="pill">Latest release on GitHub</span>
+      </div>
+    </header>
+
+    <section>
+      <h2>Features</h2>
+      <ul>
+        <li>Replace selected text layers with values from a list.</li>
+        <li>Sequential or random ordering.</li>
+        <li>Optional prefix and suffix.</li>
+        <li>Text casing: keep original, title, upper, lower.</li>
+        <li>Accepts comma, newline, or space separated input.</li>
+        <li>Upload .txt, .csv, .md, or .json to populate the list.</li>
+      </ul>
+    </section>
+
+    <section class="grid">
+      <div>
+        <h2>Usage</h2>
+        <ul>
+          <li>In Figma: <code>Plugins &gt; Development &gt; Import plugin from manifest...</code></li>
+          <li>Select one or more text layers.</li>
+          <li>Open <code>Apply Individually</code> from the Plugins menu.</li>
+          <li>Paste a list (or upload a file), pick options, then click <code>Apply to Selection</code>.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>UI Controls</h2>
+        <ul>
+          <li>Tabs: <code>Manual</code> (paste text) and <code>Upload</code> (load a file).</li>
+          <li>Text case: Keep original, Title Case, Uppercase, Lowercase.</li>
+          <li>Separator: Comma, New Line, Space.</li>
+          <li>Order: Sequential or Random.</li>
+          <li>Prefix and Suffix inputs.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>Behavior Details</h2>
+      <ul>
+        <li>Only <code>TEXT</code> nodes in the selection are updated.</li>
+        <li>If no text layers are selected, the plugin shows a notification.</li>
+        <li>If no list is provided, the plugin applies prefix/suffix/casing to existing text.</li>
+        <li>When a list is provided, text is overwritten on each selected layer.</li>
+        <li>Sequential mode wraps when the list is shorter than the selection.</li>
+        <li>For mixed-font text, the plugin loads the first character's font before updating.</li>
+        <li>Network access is disabled in <code>manifest.json</code>.</li>
+      </ul>
+    </section>
+
+    <section class="grid">
+      <div>
+        <h2>Project Structure</h2>
+        <ul>
+          <li><code>manifest.json</code> - Figma plugin manifest.</li>
+          <li><code>code.js</code> - Plugin controller logic.</li>
+          <li><code>ui.html</code> - Plugin UI.</li>
+          <li><code>.github/workflows/</code> - Release and packaging automation.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Development</h2>
+        <ul>
+          <li>No build step.</li>
+          <li>Edit <code>code.js</code> and <code>ui.html</code> directly.</li>
+          <li>Re-import the manifest into Figma for local testing.</li>
+        </ul>
+        <div class="note">License: No license file is included in this repository.</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Release Automation</h2>
+      <ul>
+        <li>On push to <code>main</code>, auto-versioning happens via commit prefixes.</li>
+        <li><code>Breaking:</code> bumps major.</li>
+        <li><code>Release:</code> or <code>Releases:</code> bumps minor.</li>
+        <li><code>Fix:</code> bumps patch.</li>
+        <li>Add <code>[no release]</code> to the latest commit message to skip packaging.</li>
+        <li>The release zip includes <code>manifest.json</code>, the <code>main</code> and <code>ui</code> files, and optional <code>assets/</code>.</li>
+        <li>A manual workflow (<code>releases-zip.yml</code>) is available via <code>workflow_dispatch</code>.</li>
+      </ul>
+    </section>
+
+    <footer>
+      Apply Individually - Figma Plugin
+    </footer>
+  </div>
+</body>
+</html>
